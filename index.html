@@ -9,21 +9,21 @@
         .paper { background: white; width: 297mm; min-height: 210mm; margin: auto; padding: 10mm; box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 4px; }
         h1 { text-align: center; margin: 0; color: #2c3e50; font-size: 20pt; text-transform: uppercase; border-bottom: 2px solid #2c3e50; }
         h2 { text-align: center; margin: 5px 0 10px 0; color: #7f8c8d; font-size: 12pt; }
-        .date-row { text-align: right; margin-bottom: 10px; font-weight: bold; font-size: 10pt; }
-        .sync-time { font-size: 8pt; color: #7f8c8d; font-style: italic; display: block; }
+        .date-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; font-weight: bold; font-size: 10pt; }
+        .sync-time { font-size: 8pt; color: #7f8c8d; font-style: italic; font-weight: normal; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
         th, td { border: 1px solid #333; padding: 4px; text-align: center; font-size: 8pt; overflow: hidden; text-overflow: ellipsis; }
         th { background-color: #ecf0f1; font-weight: bold; }
         .col-class { text-align: left; padding-left: 5px; font-weight: bold; background-color: #f9f9f9; width: 80px; }
         .col-names { text-align: left; font-size: 7pt; width: 150px; white-space: normal; }
         .grand-total { font-weight: bold; background: #2c3e50; color: white; }
-        .controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; position: sticky; top: 10px; z-index: 100; background: #f4f4f4; padding: 10px; }
-        .search-box { padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 200px; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; position: sticky; top: 0; z-index: 100; background: #f4f4f4; padding: 10px; }
+        .search-box { padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 200px; font-size: 10pt; }
         .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-fetch { background: #3498db; color: white; }
         .btn-print { background: #27ae60; color: white; }
         .btn-download { background: #e67e22; color: white; }
-        @media print { .controls { display: none; } .paper { box-shadow: none; width: 100%; padding: 0; margin: 0; border: none; } }
+        @media print { .controls { display: none; } body { padding: 0; } .paper { box-shadow: none; width: 100%; padding: 0; margin: 0; border: none; } }
     </style>
 </head>
 <body>
@@ -39,8 +39,8 @@
     <h1>MOUNTAIN VIEW SCHOOL</h1>
     <h2>DAILY ROLL CALL CONSOLIDATED REPORT</h2>
     <div class="date-row">
-        <span id="currentDate">DATE: --/--/----</span>
         <span id="syncTime" class="sync-time">Last Synced: Never</span>
+        <span id="currentDate">DATE: --/--/----</span>
     </div>
 
     <table>
@@ -75,6 +75,7 @@
 </div>
 
 <script>
+    // Your specific Google Script URL
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDaNLwHQr5CRs86sCLDX_MQTg0Gbs-DmDFSLjcyBsosvr4mt8DAb0wfNfdPNqMGfmS/exec'; 
 
     const classList = ["9P","9L","9F","9U","9J","9G","8L","8F","8U","8G","8P","7P","7L","7F","7U","7G","6P","6J","6L","6F","6U","5P","5J","5L","5F","5U","4P","4J","4L","4F","4G","4U","3L","3P","3J","3U","2P","2J","2L","2F","2U","1P","1L","1J","1U","1F","P.P.2 PEACE","P.P.2 JOY","P.P.2 LOVE","P.P.2 FAITH","P.P.1 PEACE","P.P.1 FAITH","P.P.1 LOVE","P.P.1 JOY","PP1 GLORY","F.C. PEACE","F.C. LOVE","F.C. JOY"];
@@ -94,28 +95,32 @@
 
     async function loadData() {
         const btn = document.getElementById('fetchBtn');
-        btn.innerText = "Syncing..."; btn.disabled = true;
+        btn.innerText = "Syncing..."; 
+        btn.disabled = true;
         try {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
             buildTable();
+            
             data.slice(1).forEach(row => {
                 const tr = document.querySelector(`tr[data-class="${row[0]}"]`);
                 if (tr) {
-                    // MAPPING: row[4] is Boarders (skipped)
                     tr.querySelector('.c-b').innerText = row[1] || 0;
                     tr.querySelector('.c-g').innerText = row[2] || 0;
                     tr.querySelector('.c-t').innerText = row[3] || 0;
-                    tr.querySelector('.c-l').innerText = row[5] || 0; 
-                    tr.querySelector('.c-n').innerText = row[6] || 0;
-                    tr.querySelector('.c-nr').innerText = row[7] || 0;
-                    tr.querySelector('.c-a').innerText = row[8] || 0;
-                    tr.querySelector('.c-names').innerText = row[9] || "-";
+                    tr.querySelector('.c-l').innerText = row[5] || 0; // Lunch
+                    tr.querySelector('.c-n').innerText = row[6] || 0; // New
+                    tr.querySelector('.c-nr').innerText = row[7] || 0; // N.R.
+                    tr.querySelector('.c-a').innerText = row[8] || 0; // ABS#
+                    tr.querySelector('.c-names').innerText = row[9] || "-"; // Absentee Names
                 }
             });
             calc();
             document.getElementById('syncTime').innerText = "Last Synced: " + new Date().toLocaleTimeString();
-        } catch (e) { alert("Fetch failed. Using GitHub Pages will solve this!"); }
+        } catch (e) { 
+            console.error(e);
+            alert("Fetch failed. If on GitHub, ensure Google Script is deployed to 'Anyone'."); 
+        }
         finally { btn.innerText = "🔄 FETCH DAILY DATA"; btn.disabled = false; }
     }
 
@@ -130,13 +135,15 @@
         let rows = [["CLASS", "BOYS", "GIRLS", "TOTAL", "LUNCH", "NEW", "N.R.", "ABS#", "ABSENTEE NAMES"]];
         document.querySelectorAll('#rollTable tr').forEach(tr => {
             if (tr.style.display !== "none") {
-                rows.push(Array.from(tr.querySelectorAll('td')).map(td => `"${td.innerText}"`));
+                let rowData = Array.from(tr.querySelectorAll('td')).map(td => `"${td.innerText.replace(/"/g, '""')}"`);
+                rows.push(rowData);
             }
         });
         let csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         let link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
-        link.download = `MountainView_RollCall.csv`;
+        link.href = URL.createObjectURL(blob);
+        link.download = `MountainView_RollCall_${new Date().toISOString().slice(0,10)}.csv`;
         link.click();
     }
 
@@ -159,8 +166,4 @@
     buildTable();
 </script>
 </body>
-
 </html>
-
-
-
