@@ -75,7 +75,7 @@
 </div>
 
 <script>
-    // Your specific Google Script URL
+    // Successfully verified URL for your MGfmS deployment
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDaNLwHQr5CRs86sCLDX_MQTg0Gbs-DmDFSLjcyBsosvr4mt8DAb0wfNfdPNqMGfmS/exec'; 
 
     const classList = ["9P","9L","9F","9U","9J","9G","8L","8F","8U","8G","8P","7P","7L","7F","7U","7G","6P","6J","6L","6F","6U","5P","5J","5L","5F","5U","4P","4J","4L","4F","4G","4U","3L","3P","3J","3U","2P","2J","2L","2F","2U","1P","1L","1J","1U","1F","P.P.2 PEACE","P.P.2 JOY","P.P.2 LOVE","P.P.2 FAITH","P.P.1 PEACE","P.P.1 FAITH","P.P.1 LOVE","P.P.1 JOY","PP1 GLORY","F.C. PEACE","F.C. LOVE","F.C. JOY"];
@@ -102,24 +102,25 @@
             const data = await res.json();
             buildTable();
             
+            // Corrected mapping: Skipping index 4 (Boarders) to align data
             data.slice(1).forEach(row => {
                 const tr = document.querySelector(`tr[data-class="${row[0]}"]`);
                 if (tr) {
                     tr.querySelector('.c-b').innerText = row[1] || 0;
                     tr.querySelector('.c-g').innerText = row[2] || 0;
                     tr.querySelector('.c-t').innerText = row[3] || 0;
-                    tr.querySelector('.c-l').innerText = row[5] || 0; // Lunch
-                    tr.querySelector('.c-n').innerText = row[6] || 0; // New
-                    tr.querySelector('.c-nr').innerText = row[7] || 0; // N.R.
-                    tr.querySelector('.c-a').innerText = row[8] || 0; // ABS#
-                    tr.querySelector('.c-names').innerText = row[9] || "-"; // Absentee Names
+                    tr.querySelector('.c-l').innerText = row[5] || 0; 
+                    tr.querySelector('.c-n').innerText = row[6] || 0;
+                    tr.querySelector('.c-nr').innerText = row[7] || 0;
+                    tr.querySelector('.c-a').innerText = row[8] || 0;
+                    tr.querySelector('.c-names').innerText = row[9] || "-";
                 }
             });
             calc();
             document.getElementById('syncTime').innerText = "Last Synced: " + new Date().toLocaleTimeString();
         } catch (e) { 
             console.error(e);
-            alert("Fetch failed. If on GitHub, ensure Google Script is deployed to 'Anyone'."); 
+            alert("Fetch failed. Using GitHub Pages with the 'Anyone' permission will solve this!"); 
         }
         finally { btn.innerText = "🔄 FETCH DAILY DATA"; btn.disabled = false; }
     }
@@ -167,4 +168,3 @@
 </script>
 </body>
 </html>
-
