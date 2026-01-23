@@ -39,7 +39,7 @@
     <h1>MOUNTAIN VIEW SCHOOL</h1>
     <h2>DAILY ROLL CALL CONSOLIDATED REPORT</h2>
     <div class="date-row">
-        <span id="syncTime" class="sync-time">Last Synced: Never</span>
+        <span id="syncTime" class="sync-time">Sheet Last Updated: Never</span>
         <span id="currentDate">DATE: --/--/----</span>
     </div>
 
@@ -75,15 +75,23 @@
 </div>
 
 <script>
-    // Successfully verified URL for your MGfmS deployment
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDaNLwHQr5CRs86sCLDX_MQTg0Gbs-DmDFSLjcyBsosvr4mt8DAb0wfNfdPNqMGfmS/exec'; 
+    // New URL from your MGfmS deployment
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVU4Zqjx_l6RqreNqXfppsRA7CxthcxhXDbhlk6u8xLmIuiJSWSlXuiXJ9-Gsj_qTD/exec'; 
 
     const classList = ["9P","9L","9F","9U","9J","9G","8L","8F","8U","8G","8P","7P","7L","7F","7U","7G","6P","6J","6L","6F","6U","5P","5J","5L","5F","5U","4P","4J","4L","4F","4G","4U","3L","3P","3J","3U","2P","2J","2L","2F","2U","1P","1L","1J","1U","1F","P.P.2 PEACE","P.P.2 JOY","P.P.2 LOVE","P.P.2 FAITH","P.P.1 PEACE","P.P.1 FAITH","P.P.1 LOVE","P.P.1 JOY","PP1 GLORY","F.C. PEACE","F.C. LOVE","F.C. JOY"];
 
-    document.getElementById('currentDate').innerText = "REPORT DATE: " + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+    // SAFE INITIALIZATION: Waits for the page to be ready before filling IDs
+    document.addEventListener("DOMContentLoaded", function() {
+        const dateElement = document.getElementById('currentDate');
+        if (dateElement) {
+            dateElement.innerText = "REPORT DATE: " + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+        buildTable();
+    });
 
     function buildTable() {
         const tbody = document.getElementById('rollTable');
+        if (!tbody) return;
         tbody.innerHTML = "";
         classList.forEach(cls => {
             const tr = document.createElement('tr');
@@ -99,10 +107,14 @@
         btn.disabled = true;
         try {
             const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
+            const json = await res.json();
+            const data = json.data;
+            const time = json.lastUpdated; 
+            
             buildTable();
             
-            // Corrected mapping: Skipping index 4 (Boarders) to align data
+            // Map based on your spreadsheet: 
+            // 0:Class, 1:Boys, 2:Girls, 3:Total, 4:Boarders (Skip), 5:Lunch, 6:New, 7:N.R., 8:ABS#, 9:Names
             data.slice(1).forEach(row => {
                 const tr = document.querySelector(`tr[data-class="${row[0]}"]`);
                 if (tr) {
@@ -117,12 +129,16 @@
                 }
             });
             calc();
-            document.getElementById('syncTime').innerText = "Last Synced: " + new Date().toLocaleTimeString();
+            if(time) {
+                document.getElementById('syncTime').innerText = "Sheet Last Updated: " + new Date(time).toLocaleString();
+            }
         } catch (e) { 
             console.error(e);
-            alert("Fetch failed. Using GitHub Pages with the 'Anyone' permission will solve this!"); 
+            alert("Connection error. Ensure your Script is deployed to 'Anyone' and you are using the GitHub link."); 
+        } finally { 
+            btn.innerText = "🔄 FETCH DAILY DATA"; 
+            btn.disabled = false; 
         }
-        finally { btn.innerText = "🔄 FETCH DAILY DATA"; btn.disabled = false; }
     }
 
     function filterTable() {
@@ -130,22 +146,6 @@
         document.querySelectorAll('#rollTable tr').forEach(tr => {
             tr.style.display = tr.getAttribute('data-class').includes(input) ? "" : "none";
         });
-    }
-
-    function downloadCSV() {
-        let rows = [["CLASS", "BOYS", "GIRLS", "TOTAL", "LUNCH", "NEW", "N.R.", "ABS#", "ABSENTEE NAMES"]];
-        document.querySelectorAll('#rollTable tr').forEach(tr => {
-            if (tr.style.display !== "none") {
-                let rowData = Array.from(tr.querySelectorAll('td')).map(td => `"${td.innerText.replace(/"/g, '""')}"`);
-                rows.push(rowData);
-            }
-        });
-        let csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
-        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        let link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `MountainView_RollCall_${new Date().toISOString().slice(0,10)}.csv`;
-        link.click();
     }
 
     function calc() {
@@ -164,8 +164,22 @@
         document.getElementById('gNew').innerText = n; document.getElementById('gNR').innerText = nr;
         document.getElementById('gAbs').innerText = a;
     }
-    buildTable();
+
+    function downloadCSV() {
+        let rows = [["CLASS", "BOYS", "GIRLS", "TOTAL", "LUNCH", "NEW", "N.R.", "ABS#", "ABSENTEE NAMES"]];
+        document.querySelectorAll('#rollTable tr').forEach(tr => {
+            if (tr.style.display !== "none") {
+                let rowData = Array.from(tr.querySelectorAll('td')).map(td => `"${td.innerText.replace(/"/g, '""')}"`);
+                rows.push(rowData);
+            }
+        });
+        let csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `MountainView_RollCall_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+    }
 </script>
 </body>
 </html>
-
