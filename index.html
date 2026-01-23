@@ -76,8 +76,20 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVU4Zqjx_l6RqreNqXfppsRA7CxthcxhXDbhlk6u8xLmIuiJSWSlXuiXJ9-Gsj_qTD/exec'; 
 
     // THE EXACT ORDER YOU PROVIDED
-    const classList = ["9P","9L","9F","9U","9J","9G","8L","8F","8U","8G","8P","7P","7L","7F","7U","7G","6P","6J","6L","6F","6U","5P","5J","5L","5F","5U","4P","4J","4L","4F","4G","4U","3L","3P","3J","3U","2P","2J","2L","2F","2U","1P","1L","1J","1U","1F","P.P.2 PEACE","P.P.2 JOY","P.P.2 LOVE","P.P.2 FAITH","P.P.1 PEACE","P.P.1 FAITH","P.P.1 LOVE","P.P.1 JOY","P.P.1 GLORY","F.C. PEACE","F.C. LOVE","F.C. JOY"];
-
+   const classList = [
+    "9L", "9F", "9U", "9J", "9G",
+    "8L", "8F", "8U", "8G", "8P",
+    "7P", "7L", "7F", "7U", "7G",
+    "6P", "6J", "6L", "6F", "6U",
+    "5P", "5J", "5L", "5F", "5U",
+    "4P", "4J", "4L", "4F", "4G", "4U",
+    "3L", "3P", "3J", "3U",
+    "2P", "2J", "2L", "2F", "2U",
+    "1P", "1L", "1J", "1U", "1F",
+    "P.P.2 PEACE", "P.P.2 JOY", "P.P.2 LOVE", "P.P.2 FAITH",
+    "P.P.1 PEACE", "P.P.1 FAITH", "P.P.1 LOVE", "P.P.1 JOY", "P.P.1 GLORY",
+    "F.C. PEACE", "F.C. LOVE", "F.C. JOY", "9P"
+];
     document.addEventListener("DOMContentLoaded", function() {
         const dateElement = document.getElementById('currentDate');
         if (dateElement) {
